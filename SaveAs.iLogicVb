@@ -1,0 +1,25 @@
+﻿Dim StockNumber As String
+Dim Description As String
+Dim FileName As String
+Dim oldFileName As String
+'Dim PathLocation As String
+'Dim PathAndFile As String
+
+StockNumber = iProperties.Value("Project", "Stock Number")
+Description = iProperties.Value("Project", "Description")
+FileName = StockNumber & " - " & Description
+oldFileName = ThisDoc.FileName(False)
+
+
+'PathAndFile = ThisDoc.Path & "\" & StockNumber & " - " & Description & ".ipt"
+
+'If System.IO.File.Exists(ThisDoc.PathAndFileName(False)) Then
+	If ThisDoc.FileName(False) = FileName
+		'ThisDoc.Save
+	Else
+		ThisDoc.Document.SaveAs(ThisDoc.Path & "\" & FileName & ".ipt", False)
+		'If ThisDoc.FileName(False) = oldFileName
+		'	My.Computer.FileSystem.DeleteFile(ThisDoc.Path & "\" & oldFileName & ".ipt")
+		'End If
+	End If
+'End If

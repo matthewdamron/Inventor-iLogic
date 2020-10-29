@@ -1,0 +1,37 @@
+﻿
+'    Dim oSourceDocument As DrawingDocument
+'    oSourceDocument = ThisApplication.ActiveDocument
+    
+'    ' Open the new drawing to copy the title block into.
+'    Dim oNewDocument As DrawingDocument
+'    oNewDocument = ThisApplication.Documents.Open("C:\temp\TitleBlockChange.idw")
+    
+'    ' Get the new source title block definition.
+'    Dim oSourceTitleBlockDef As TitleBlockDefinition
+'    oSourceTitleBlockDef = oSourceDocument.ActiveSheet.TitleBlock.Definition
+    
+'    ' Get the new title block definition.
+'    Dim oNewTitleBlockDef As TitleBlockDefinition
+'    oNewTitleBlockDef = oSourceTitleBlockDef.CopyTo(oNewDocument, True)
+    
+
+
+Dim oCurrentDocument As DrawingDocument
+oCurrentDocument = ThisApplication.ActiveDocument
+
+Dim oOptions As NameValueMap
+oOptions = ThisApplication.TransientObjects.CreateNameValueMap
+    
+' Open the new drawing to copy the title block into.
+Dim oSourceDocument As DrawingDocument
+oSourceDocument = ThisApplication.Documents.OpenWithOptions("C:\CAD Support\Inventor\Templates\Fetzer.dwg", oOptions, False)
+    
+' Get the new source title block definition.
+Dim oSourceTitleBlockDef As TitleBlockDefinition
+oSourceTitleBlockDef = oSourceDocument.ActiveSheet.TitleBlock.Definition
+    
+' Get the new title block definition.
+Dim oNewTitleBlockDef As TitleBlockDefinition
+oNewTitleBlockDef = oSourceTitleBlockDef.CopyTo(oCurrentDocument, True)
+
+oSourceDocument.Close

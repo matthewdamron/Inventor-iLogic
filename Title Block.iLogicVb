@@ -1,0 +1,52 @@
+﻿Dim oDrawing As DrawingDocument = ThisApplication.ActiveDocument
+Dim oCurrentSheetName As String = ActiveSheet.Name
+Dim oFullTitleBlock As String = "Fetzer 30x42"
+Dim oSketchTitleBlock As String = "Fetzer Sketch"
+Dim oFullTitleBlockDef As TitleBlockDefinition = oDrawing.TitleBlockDefinitions.Item(oFullTitleBlock)
+Dim oSketchTitleBlockDef As TitleBlockDefinition = oDrawing.TitleBlockDefinitions.Item(oSketchTitleBlock)
+Dim oSheet As Sheet
+Dim oSheetName As String
+Dim oSheetNameSplit As String()
+Dim attribSets As AttributeSets = doc.AttributeSets
+Dim attribSet As AttributeSet
+Dim attrib As Attribute
+
+i = 0
+For Each oSheet In oDrawing.Sheets
+	If oSheet.ExcludeFromCount = False Then
+		oSheetName = oSheet.Name
+		ActiveSheet = ThisDrawing.Sheet(oSheetName)
+		oSheetNameSplit = oSheet.Name.Split(New Char() {":"c })	
+		If oSheet.TitleBlock.Definition Is oFullTitleBlockDef Then
+			ActiveSheet.SetTitleBlock(oFullTitleBlock, oSheetNameSplit(0))
+		Else If oSheet.TitleBlock.Definition Is oSketchTitleBlockDef Then
+			ActiveSheet.SetTitleBlock(oSketchTitleBlock, oSheetNameSplit(0))
+		End If
+	End If
+Next
+
+ActiveSheet = ThisDrawing.Sheet(oCurrentSheetName)
+
+Dim doc As Document = ThisApplication.ActiveDocument 
+Dim attribSets As AttributeSets = doc.AttributeSets
+Dim attribSet As AttributeSet
+Dim attrib As Attribute
+
+' Create an attribute set or see if existes.
+Try
+	attribSet = attribSets.Add("Fetzer")
+Catch
+	attribSet = attribSets.Item("Fetzer")
+End Try
+
+' Create an attribute on the set or change.
+Try
+	attrib = attribSet.Add("TitleVersion", kIntegerType, 1)
+Catch
+	attrib = attribSet.Item("TitleVersion")
+	attrib.Value = 1
+End Try
+
+
+
+InventorVb.DocumentUpdate()

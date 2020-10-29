@@ -1,0 +1,30 @@
+﻿oLength = 2.53818330921215' deleted parameter
+
+oWidth = 0.713200108239706' deleted parameter
+
+oThickness = 0.25' deleted parameter
+
+oLength = "2.53818330921215"' deleted parameter
+
+oWidth = "1"' deleted parameter
+
+oThickness = "0.25"' deleted parameter
+
+' Get overall Sizes
+Dim x = Measure.ExtentsLength
+Dim y = Measure.ExtentsWidth
+Dim z = Measure.ExtentsHeight
+' Makes smallest value the Thickness
+oThickness = MinOfMany (x, y, z)
+' Makes Largest value Length
+oLength = MaxOfMany (x, y, z)
+' Makes the leftover value the Width
+If (oThickness = x And oLength = y) Or (oThickness = y And oLength = x)Then
+oWidth = z
+Else If (oThickness = x And oLength = z) Or (oThickness = z And oLength = x)Then
+oWidth = y
+Else If (oThickness = y And oLength = z) Or (oThickness = z And oLength = y)Then
+oWidth = x
+End If
+
+InventorVb.DocumentUpdate()

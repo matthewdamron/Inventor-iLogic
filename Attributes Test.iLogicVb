@@ -1,0 +1,19 @@
+﻿Dim doc As Document = ThisApplication.ActiveDocument 
+Dim attribSets As AttributeSets = doc.AttributeSets
+Dim attribSet As AttributeSet
+Dim attrib As Attribute
+
+' Create an attribute set or see if existes.
+Try
+	attribSet = attribSets.Add("Fetzer")
+Catch
+	attribSet = attribSets.Item("Fetzer")
+End Try
+
+' Create an attribute on the set or change.
+Try
+	attrib = attribSet.Add("TitleVersion", kIntegerType, 1)
+Catch
+	attrib = attribSet.Item("TitleVersion")
+	attrib.Value = 1
+End Try

@@ -1,0 +1,27 @@
+﻿Sub Main()
+	Dim oDoc As PartDocument = ThisDoc.Document
+	oDef = oDoc.ComponentDefinition
+	Dim oBody As SurfaceBody
+	Dim oLocalAsset As Asset
+	Dim oLibaryAsset As AssetLibrary = ThisApplication.AssetLibraries.Item("FetzerMaterialLibrary")
+	oColor = "Skeleton"
+	Dim oLocalAssetCopy As Asset = oLibaryAsset.AppearanceAssets.Item(oColor)
+	
+	Do
+		Try
+			oLocalAsset = oDoc.Assets.Item(oColor)
+		Catch
+			oLocalAsset = oLocalAssetCopy.CopyTo(ThisApplication.ActiveDocument)
+			oLocalAsset = oDoc.Assets.Item(oColor)		
+		End Try
+		
+		oBody = ThisApplication.CommandManager.Pick(SelectionFilterEnum.kPartBodyFilter, "Pick Body to Convert to Skeleton")
+		If oBody Is Nothing
+			GoTo ExitSelectLoop
+		End If
+		
+		oBody.Appearance = oLocalAsset
+		
+	Loop
+ExitSelectLoop:
+End Sub

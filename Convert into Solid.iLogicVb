@@ -1,0 +1,19 @@
+﻿Sub Main()
+	Dim oDoc As PartDocument = ThisDoc.Document
+	oDef = oDoc.ComponentDefinition
+	Dim oBody As SurfaceBody
+	Dim oLocalAsset As Asset
+	oColor = "Default"
+	
+	Do		
+		oBody = ThisApplication.CommandManager.Pick(SelectionFilterEnum.kPartBodyFilter, "Pick Body to Convert to Solid")
+		If oBody Is Nothing
+			GoTo ExitSelectLoop
+		End If
+		
+		oLocalAsset = oDoc.Assets.Item(oColor)
+		oBody.Appearance = oLocalAsset
+		
+	Loop
+ExitSelectLoop:
+End Sub

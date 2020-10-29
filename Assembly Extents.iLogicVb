@@ -1,0 +1,30 @@
+﻿Parameter("Width") = 1
+Parameter("Height") = 1
+Parameter("Depth") = 1
+
+' Get overall Sizes
+Dim x = Measure.ExtentsLength
+Dim y = Measure.ExtentsWidth
+Dim z = Measure.ExtentsHeight
+Parameter("Depth") = y
+Parameter("Height") = z
+Parameter("Width") = x
+
+iProperties.Value("Custom", "Depth") = Parameter("Depth")
+iProperties.Value("Custom", "Height") = Parameter("Height")
+iProperties.Value("Custom", "Width") = Parameter("Width")
+
+' Makes smallest value the Thickness
+'Parameter("Depth") = MinOfMany (x, y, z)
+' Makes Largest value Length
+'Parameter("Height") = MaxOfMany (x, y, z)
+' Makes the leftover value the Width
+'If (Parameter("Depth") = x And Parameter("Height") = y) Or (Parameter("Depth") = y And Parameter("Height") = x)Then
+'oWidth = z
+'Else If (Parameter("Depth") = x And Parameter("Height") = z) Or (Parameter("Width") = z And Parameter("Height") = x)Then
+'oWidth = y
+'Else If (Parameter("Depth") = y And Parameter("Height") = z) Or (Parameter("Width") = z And Parameter("Height") = y)Then
+'oWidth = x
+'End If
+
+InventorVb.DocumentUpdate()

@@ -1,0 +1,67 @@
+﻿Dim oDrawingDoc As DrawingDocument = ThisDoc.Document
+Dim oSheet As Sheet = oDrawingDoc.ActiveSheet
+Dim oView As DrawingView
+Dim oSketchedSymbol As SketchedSymbol
+Dim oLeaderPoints As ObjectCollection
+Dim oStartPoint As Point2d
+Dim oEndPoint As Point2d
+Dim oTemp As String()
+Dim oViewName As String
+Dim oPromptStrings As String()
+Dim oViewTitle As String
+Dim oArchRef As String = ""
+Dim oScale As String
+Dim oViewNumber As String
+Dim oViewRef As String = "-"
+
+Dim oSSDef As SketchedSymbolDefinition
+Try
+	oSSDef = oDrawingDoc.SketchedSymbolDefinitions.Item("View Title")
+Catch
+	Dim oSketchSymLib As SketchedSymbolDefinitionLibrary
+	oSketchSymLib = oDrawingDoc.SketchedSymbolDefinitions.SketchedSymbolDefinitionLibraries.Item("Fetzer Symbols")
+	oSSDef = oDrawingDoc.SketchedSymbolDefinitions.AddFromLibrary(oSketchSymLib, "View Title", False)
+End Try
+
+Do
+	oStartPoint = Nothing
+	oEndPoint = Nothing
+	oLeaderPoints = ThisApplication.TransientObjects.CreateObjectCollection()
+	oView = ThisApplication.CommandManager.Pick(kDrawingViewFilter, "Pick Drawing View")
+	If oView Is Nothing
+		GoTo ExitSelectLoop
+	End If
+
+	oView.ShowLabel = False
+
+	oViewName = oView.Name
+	If oViewName.IndexOfAny("-") = 1
+		oTemp = oView.Name.Split(New Char() {"-"c })
+	Else
+		myparam = InputBox("Enter View Name", "View Title", "1-Elevation").ToUpper()
+		oView.Name = myparam
+		oTemp = myparam.Split(New Char() {"-"c })
+	End If
+
+	oViewNumber = oTemp(0)
+	oViewTitle = oTemp(1)
+	oScale = oView.ScaleString
+	If oView.Scale = 1
+		oScale = "FULL SCALE"
+	End If
+
+	oPromptStrings = {oViewTitle, oArchRef, oScale, oViewNumber, oViewRef}
+	oBottomOfView = oView.Top - oView.Height
+	oLeftOfView = oView.Left
+	oBottomOfViewExtra = oBottomOfView - 2
+
+	oStartPoint = ThisApplication.TransientGeometry.CreatePoint2d(oLeftOfView, oBottomOfViewExtra)
+	oEndPoint = ThisApplication.TransientGeometry.CreatePoint2d(oLeftOfView, oBottomOfView)
+	oLeaderPoints.Add(oStartPoint)
+	oLeaderPoints.Add(oEndPoint)
+
+	oSketchedSymbol = oSheet.SketchedSymbols.AddWithLeader(oSSDef, oLeaderPoints, 0, 1, oPromptStrings, , True)
+	oSketchedSymbol.LeaderVisible = False
+	oSketchedSymbol.Name = "View Title " & oTemp(0) & "-" & oTemp(1)
+Loop
+ExitSelectLoop:

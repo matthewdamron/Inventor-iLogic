@@ -1,0 +1,23 @@
+﻿Sub Main()
+	Dim oDoc As PartDocument
+	oDoc = ThisApplication.ActiveDocument
+	Dim oCompDef As PartComponentDefinition
+	oCompDef = oDoc.ComponentDefinition
+	Dim oFaceColl As FaceCollection
+	oFaceColl = ThisApplication.TransientObjects.CreateFaceCollection
+	Dim oDist As String
+	oDist = InputBox("Enter Thickness of Panel", "Thickness of Panel", oDist)
+	If oDist Is ""
+		GoTo ExitSelectLoop
+	End If
+	Do
+		oFace = ThisApplication.CommandManager.Pick(kPartFaceFilter, "Pick Face to Thicken")
+		oFaceColl.Clear()
+		If oFace Is Nothing
+			GoTo ExitSelectLoop
+		End If
+		oFaceColl.Add(oFace)
+		oCompDef.Features.ThickenFeatures.Add(oFaceColl, oDist, kNegativeExtentDirection, kNewBodyOperation, False, False, False)
+	Loop
+	ExitSelectLoop:
+End Sub

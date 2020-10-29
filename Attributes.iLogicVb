@@ -1,0 +1,32 @@
+﻿
+    ' Get the active document.  It can be any type of document.
+    Dim doc As Document
+     doc = ThisApplication.ActiveDocument
+
+
+    ' Get the selected entity.
+    Dim entity As Object
+    On Error Resume Next
+     entity = doc.SelectSet.Item(1)
+    If Err Then
+        MessageBox ("You must select an entity.", "Select")
+        Exit Sub
+    End If
+
+    ' Get the AttributeSets object from the selected entity.
+    Dim attribSets As AttributeSets
+     attribSets = entity.AttributeSets
+    If Err Then
+        MessageBox.Show ("You must select an entity that supports attributes.", "Select")
+        Exit Sub
+    End If
+    On Error GoTo 0
+
+    ' Create an attribute set.
+    Dim attribSet As AttributeSet
+     attribSet = attribSets.Add("SampleSet")
+
+    ' Create an attribute on the set.
+    Dim attrib As Inventor.Attribute
+     attrib = attribSet.Add("SampleAttribute", _
+                               kStringType, "A Test")

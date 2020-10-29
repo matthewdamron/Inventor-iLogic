@@ -1,0 +1,29 @@
+﻿Dim oDoc As Document = ThisApplication.ActiveDocument
+oDef = oDoc.ComponentDefinition
+Dim oAttribSet As AttributeSet
+Dim oAttrib As Attribute
+Dim oBody As SurfaceBody
+
+For Each oBody In oDef.SurfaceBodies
+	If oBody.Appearance.DisplayName = "Panel"
+		Try
+			oAttribSet = oBody.AttributeSets.Add("Fetzer")
+		Catch
+			oAttribSet = oBody.AttributeSets.Item("Fetzer")
+		End Try
+	
+		Try
+			oAttrib = oAttribSet.Add("Visibility", kStringType, "True")
+		Catch
+			oAttrib = oAttribSet.Item("Visibility")
+		End Try
+	
+		If oAttrib.Value = "True"
+			oBody.Visible = True
+			oAttrib.Value = "False"
+		Else
+			oBody.Visible = False
+			oAttrib.Value = "True"
+		End If
+	End If
+Next

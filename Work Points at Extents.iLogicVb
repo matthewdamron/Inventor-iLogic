@@ -1,0 +1,152 @@
+﻿Option Explicit On
+'--------------------------------
+'Author: nannerdw
+'Last modified date: 21 Oct, 2019
+'Description: This iLogic example requires a file with one surface body and one UCS.
+	'It creates workpoints at the vertices of a bounding box aligned to the UCS.
+'--------------------------------
+
+Private Class ThisRule
+	Dim _app As Inventor.Application = Nothing
+	Dim _doc As Document = Nothing
+	Dim _compDef As ComponentDefinition = Nothing
+	
+	Private Sub Main
+		_app = ThisApplication
+	    _doc = _app.ActiveDocument
+		_compDef = _doc.ComponentDefinition
+		
+		Dim alignedRangeBox As OrientedBox = Me.GetRangeBoxAlignedToUCS( _
+			oBody :=_compDef.SurfaceBodies(1), _
+			ucs :=_compDef.UserCoordinateSystems(1))
+		
+		Me.AddFixedWorkPoints(oPoints :=OrientedBox_GetVertices( _
+			alignedRangeBox), _
+			CreateTransaction :=True)
+	End Sub
+
+	Private Function GetRangeBoxAlignedToUCS( _
+		oBody As SurfaceBody, _
+		ucs As UserCoordinateSystem) As OrientedBox
+		
+		Dim oTransientBRep As TransientBRep = _app.TransientBRep
+		Dim tg As TransientGeometry = _app.TransientGeometry
+		
+		'Create transient copy of body
+	    Dim transientBody As SurfaceBody = oTransientBRep.Copy(oBody)
+		
+		'Get vectors aligned with UCS
+		Dim ucsXAxis As Vector = Me.WorkAxisToVector(ucs.XAxis)
+		Dim ucsYAxis As Vector = Me.WorkAxisToVector(ucs.YAxis)
+		Dim ucsZAxis As Vector = Me.WorkAxisToVector(ucs.ZAxis)
+		
+		'Create transformation matrix from UCS to WCS
+	    Dim UCSToWCSMatrix As Matrix = ucs.Transformation
+		
+		UCSToWCSMatrix.SetToAlignCoordinateSystems( _
+	       	FromOrigin:=ucs.Origin.Point, _
+	        FromXAxis:=ucsXAxis, _
+	        FromYAxis:=ucsYAxis, _
+	        FromZAxis:=ucsZAxis, _
+	       	ToOrigin:=tg.CreatePoint(), _
+	        ToXAxis:=tg.CreateVector(1, 0, 0), _
+	        ToYAxis:=tg.CreateVector(0, 1, 0), _
+	        ToZAxis:=tg.CreateVector(0, 0, 1))
+	    
+		'Transform transient body from UCS to WCS
+		oTransientBRep.Transform(transientBody, UCSToWCSMatrix)
+		
+		'Create transformation matrix from WCS to UCS
+		Dim WCSToUCSMatrix As Matrix = UCSToWCSMatrix.Copy
+		WCSToUCSMatrix.Invert
+		
+		'Transform corner point of rangebox from WCS to UCS
+		Dim cornerPoint As Point = transientBody.RangeBox.MinPoint.Copy
+		cornerPoint.TransformBy(WCSToUCSMatrix)
+		
+		'Scale UCS vectors to match dimensions of rangebox
+		With transientBody.RangeBox
+			ucsXAxis.ScaleBy(.MaxPoint.X - .MinPoint.X)
+			ucsYAxis.ScaleBy(.MaxPoint.Y - .MinPoint.Y)
+			ucsZAxis.ScaleBy(.MaxPoint.Z - .MinPoint.Z)
+		End With
+
+		'Create UCS-aligned rangebox
+		Return tg.CreateOrientedBox( _
+			CornerPoint:=cornerPoint, _
+			DirectionOne:=ucsXAxis, _
+			DirectionTwo:=ucsYAxis, _
+			DirectionThree:=ucsZAxis)
+	End Function
+
+	Private Function WorkAxisToVector(oWorkAxis As WorkAxis) As Vector
+		With oWorkAxis.Line.Direction
+	        Return _app.TransientGeometry.CreateVector(.X, .Y, .Z)
+	    End With
+	End Function
+	
+	Private Function OrientedBox_GetVertices(oOrientedBox As OrientedBox) As List(Of Point)
+		Dim verts As New List(Of Point)
+		
+		With oOrientedBox
+			'Corner Point
+			Dim tmpPoint As Point = .CornerPoint.Copy
+			verts.Add(tmpPoint.Copy)
+			
+			'+X
+			tmpPoint.TranslateBy(.DirectionOne)
+			verts.Add(tmpPoint.Copy)
+			
+			'+X+Y
+			tmpPoint.TranslateBy(.DirectionTwo)
+			verts.Add(tmpPoint.Copy)
+			
+			'+Y
+			Dim dirOneInverse As Vector = .DirectionOne
+			dirOneInverse.ScaleBy(-1)
+			tmpPoint.TranslateBy(dirOneInverse)
+			verts.Add(tmpPoint.Copy)
+			
+			'+Y +Z
+			tmpPoint.TranslateBy(.DirectionThree)
+			verts.Add(tmpPoint.Copy)
+			
+			'+Z
+			Dim dirTwoInverse As Vector = .DirectionTwo
+			dirTwoInverse.ScaleBy(-1)
+			tmpPoint.TranslateBy(dirTwoInverse)
+			verts.Add(tmpPoint.Copy)
+			
+			'+Z +X
+			tmpPoint.TranslateBy(.DirectionOne)
+			verts.Add(tmpPoint.Copy)
+			
+			'+Z +X +Y
+			tmpPoint.TranslateBy(.DirectionTwo)
+			verts.Add(tmpPoint.Copy)
+		End With
+		
+		Return verts
+	End Function
+	
+	Private Sub AddFixedWorkPoints( _
+		oPoints As IEnumerable(Of Point), _
+		Optional CreateTransaction As Boolean = True)
+		
+		Dim oTransaction As Transaction
+	
+		Try
+			If CreateTransaction Then oTransaction = _app.TransactionManager.StartTransaction(_doc,"Add Fixed Workpoints")
+			
+			For Each oVertex As Point In oPoints
+				_compDef.Workpoints.AddFixed(oVertex)
+			Next
+			
+		If CreateTransaction Then oTransaction.End
+			
+		Catch ex As Exception
+			If CreateTransaction Then oTransaction.Abort
+			Throw 'Unandled Exception
+		End Try
+	End Sub
+End Class

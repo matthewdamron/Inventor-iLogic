@@ -1,0 +1,23 @@
+﻿Imports  Inventor.UnitsTypeEnum
+' Create Custom Paramteres if not done.
+Dim oPartDoc As PartDocument = ThisDoc.Document
+Dim userParams As UserParameters = oPartDoc.ComponentDefinition.Parameters.UserParameters
+Try
+  parametro = oPartDoc.ComponentDefinition.Parameters.UserParameters("oThickness")
+  Catch
+    Dim newParam As UserParameter = userParams.AddByExpression("oThickness", "1", UnitsTypeEnum.kInchLengthUnits)
+End Try
+
+Try
+  parametro = oPartDoc.ComponentDefinition.Parameters.UserParameters("oWidth")
+Catch
+    Dim newParam As UserParameter = userParams.AddByExpression("oWidth", "1", UnitsTypeEnum.kInchLengthUnits)
+End Try
+
+Try
+  parametro = oPartDoc.ComponentDefinition.Parameters.UserParameters("oLength")
+Catch
+    Dim newParam As UserParameter = userParams.AddByExpression("oLength", "1", UnitsTypeEnum.kInchLengthUnits)
+End Try
+
+'iLogicVb.RunRule("Measure Extents")

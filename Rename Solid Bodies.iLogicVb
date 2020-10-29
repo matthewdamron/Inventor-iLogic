@@ -1,0 +1,17 @@
+﻿Dim oBody As SurfaceBody
+Dim oDoc As Document = ThisApplication.ActiveDocument
+oDef = oDoc.ComponentDefinition
+	Do
+		oBody = ThisApplication.CommandManager.Pick(SelectionFilterEnum.kPartBodyFilter, "Pick Body to Rename")
+		If oBody Is Nothing
+			GoTo ExitSelectLoop
+		End If
+		myparam = InputBox("Enter Solid Body Name", "Rename Solid Body", oBody.Name)
+		If myparam <> "" Then
+			oBody.Name = myparam
+			Else
+				GoTo ExitSelectLoop
+		End If
+	Loop
+ExitSelectLoop:
+

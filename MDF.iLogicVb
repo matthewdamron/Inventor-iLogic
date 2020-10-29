@@ -1,0 +1,158 @@
+﻿Dim oDrawingDoc As DrawingDocument = ThisDoc.Document
+Dim oSheet As Sheet = oDrawingDoc.ActiveSheet
+'Dim oDrawView As DrawingView
+'Dim oDrawCurvSeg As DrawingCurveSegment
+Dim oMidY As Decimal
+Dim oMidX As Decimal
+Dim oMid As Point2d
+Dim oRadian As Double
+Dim oRadToDeg As Integer
+Dim oSSDef As SketchedSymbolDefinition
+Try
+	oSSDef = oDrawingDoc.SketchedSymbolDefinitions.Item("MDF")
+Catch
+	Dim oSketchSymLib As SketchedSymbolDefinitionLibrary
+	oSketchSymLib = oDrawingDoc.SketchedSymbolDefinitions.SketchedSymbolDefinitionLibraries.Item("Fetzer Symbols")
+	oSSDef = oDrawingDoc.SketchedSymbolDefinitions.AddFromLibrary(oSketchSymLib, "MDF", False)
+End Try
+
+Do
+	'Select Line for Symbol Insert
+	oSelection = ThisApplication.CommandManager.Pick(kDrawingDefaultFilter, "Pick Point for MDF")
+	If oSelection Is Nothing
+		GoTo ExitSelectLoop
+	End If
+'	If oSelection Is oDrawView
+'		oMidY = ModelPosition.Y
+'		oMidX = ModelPosition.X
+'		oMid = ThisApplication.TransientGeometry.CreatePoint2d(oMidX, oMidY)
+'	End If
+'	If oSelection Is oDrawCurvSeg
+		'Find the Radian
+		Dim oSlopeY As Double = oSelection.StartPoint.Y - oSelection.EndPoint.Y
+		Dim oSlopeX As Double = oSelection.StartPoint.X - oSelection.EndPoint.X
+
+		oRadian = Math.Atan2(oSlopeY, oSlopeX)
+		oRadian = Math.Round(oRadian - Math.PI / 2, 3)
+		'Convert Radian to positive number
+		If oRadian < 0
+			oRadian = oRadian + 2 * Math.PI
+		End If
+		'Convert the Radian to Degree
+		oRadToDeg = oRadian * 180 / Math.PI
+
+		'Find MidPoint of Selected Line
+		oMidY = (oSelection.StartPoint.Y + oSelection.EndPoint.Y) / 2
+		oMidX = (oSelection.StartPoint.X + oSelection.EndPoint.X) / 2
+		oMid = ThisApplication.TransientGeometry.CreatePoint2d(oMidX, oMidY)
+'	End If
+	
+	oSketchedSymbol = oSheet.SketchedSymbols.Add(oSSDef, oMid, oRadian, 12, )
+
+	'Rotate Symbol
+	Dim DegOfRot As New ArrayList
+	DegOfRot.Add("0")
+	DegOfRot.Add("45")
+	DegOfRot.Add("90")
+	DegOfRot.Add("135")
+	DegOfRot.Add("180")
+	DegOfRot.Add("225")
+	DegOfRot.Add("270")
+	DegOfRot.Add("315")
+	DegOfRot.Add("360")
+
+	If DegOfRot.Contains(CStr(oRadToDeg))
+		oRotate = MessageBox.Show("Would you like to rotate the symbol?", "Rotate Symbol", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2)
+		If oRotate = vbYes Then
+			oRotation = InputListBox(oRadToDeg.ToString, DegOfRot, oRadToDeg, Title := "World Rotate", ListName := "Degrees of Rotation")
+			If oRotation = "0" Or oRotation = "360"
+				oRadian = 2 * Math.PI
+			End If
+			If oRotation = "45"
+				oRadian = Math.PI / 4
+			End If
+			If oRotation = "90"
+				oRadian = Math.PI / 2
+			End If
+			If oRotation = "135"
+				oRadian = 3 * Math.PI / 4
+			End If
+			If oRotation = "180"
+				oRadian = Math.PI
+			End If
+			If oRotation = "225"
+				oRadian = 5 * Math.PI / 4
+			End If
+			If oRotation = "270"
+				oRadian = 3 * Math.PI / 2
+			End If
+			If oRotation = "315"
+				oRadian = 7 * Math.PI / 4
+			End If
+			oSketchedSymbol.Rotation = oRadian
+		End If
+	Else
+		oCurrentRotate = MessageBox.Show("Would you like to rotate the symbol?", "Rotate Symbol", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2)
+		If oCurrentRotate = vbYes Then
+			oCurrentRotation = InputListBox(oRadToDeg.ToString, DegOfRot, oDegree, Title := "@ Current Rotate", ListName := "Degrees of Rotation")
+			If oCurrentRotation = "0" Or oCurrentRotation = "360"
+				If oRadian < 0
+					oRadian = oRadian - 2 * Math.PI
+				Else
+					oRadian = oRadian + 2 * Math.PI
+				End If
+			End If
+			If oCurrentRotation = "45"
+				If oRadian < 0
+					oRadian = oRadian - Math.PI / 4
+				Else
+					oRadian = oRadian + Math.PI / 4
+				End If
+			End If
+			If oCurrentRotation = "90"
+				If oRadian < 0
+					oRadian = oRadian - Math.PI / 2
+				Else
+					oRadian = oRadian + Math.PI / 2
+				End If
+			End If
+			If oCurrentRotation = "135"
+				If oRadian < 0
+					oRadian = oRadian - 3 * Math.PI / 4
+				Else
+					oRadian = oRadian - 3 * Math.PI / 4
+				End If
+			End If
+			If oCurrentRotation = "180"
+				If oRadian < 0
+					oRadian = oRadian - Math.PI
+				Else
+					oRadian = oRadian + Math.PI
+				End If
+			End If
+			If oCurrentRotation = "225"
+				If oRadian < 0
+					oRadian = oRadian - 5 * Math.PI / 4
+				Else
+					oRadian = oRadian + 5 * Math.PI / 4
+				End If
+			End If
+			If oCurrentRotation = "270"
+				If oRadian < 0
+					oRadian = oRadian - 3 * Math.PI / 2
+				Else
+					oRadian = oRadian + 3 * Math.PI / 2
+				End If
+			End If
+			If oCurrentRotation = "315"
+				If oRadian < 0
+					oRadian = oRadian - 7 * Math.PI / 4
+				Else
+					oRadian = oRadian + 7 * Math.PI / 4
+				End If
+			End If
+			oSketchedSymbol.Rotation = oRadian
+		End If
+	End If
+Loop
+ExitSelectLoop:
